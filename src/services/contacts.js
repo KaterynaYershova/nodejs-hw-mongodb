@@ -9,15 +9,21 @@ export const getContactById = async (contactId) => {
 };
 
 export const addContact = async (contactData) => {
+  if (!contactData.name || !contactData.phoneNumber) {
+    throw new Error('Name and phone number are required.');
+  }
   return await Contact.create(contactData);
 };
 
 export const updateContact = async (contactId, contactData) => {
-  return await Contact.findByIdAndUpdate(contactId, contactData, { new: true });
+  const updatedContact = await Contact.findByIdAndUpdate(contactId, contactData, { new: true });
+  if (!updatedContact) {
+    throw new Error('Contact not found');
+  }
+  return updatedContact;
 };
 
 export const deleteContact = async (contactId) => {
   const result = await Contact.findByIdAndDelete(contactId);
   return result !== null;
 };
-
