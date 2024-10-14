@@ -15,6 +15,9 @@ export const getContactById = async (req, res, next) => {
 };
 
 export const addContact = async (req, res, next) => {
+  if (!req.body.name || !req.body.phoneNumber) {
+    throw createError(400, 'Name and phone number are required.'); 
+  }
   const newContact = await contactsService.addContact(req.body);
   res.status(201).json({ status: 201, message: 'Successfully created a contact!', data: newContact });
 };
@@ -24,7 +27,7 @@ export const updateContact = async (req, res, next) => {
   if (!updatedContact) {
     throw createError(404, 'Contact not found');
   }
-  res.status(200).json({ status: 200, message: 'Successfully patched a contact!', data: updatedContact });
+  res.status(200).json({ status: 200, message: "Successfully patched a contact!", data: updatedContact }); 
 };
 
 export const deleteContact = async (req, res, next) => {
@@ -32,5 +35,5 @@ export const deleteContact = async (req, res, next) => {
   if (!deleted) {
     throw createError(404, 'Contact not found');
   }
-  res.status(204).send();
+  res.status(204).send(); 
 };
