@@ -9,9 +9,6 @@ export const getContactById = async (contactId) => {
 };
 
 export const addContact = async (contactData) => {
-  if (!contactData.name || !contactData.phoneNumber) {
-    throw new Error('Name and phone number are required.');
-  }
   return await Contact.create(contactData);
 };
 
@@ -27,3 +24,4 @@ export const deleteContact = async (contactId) => {
   const result = await Contact.findByIdAndDelete(contactId);
   return result !== null;
 };
+
