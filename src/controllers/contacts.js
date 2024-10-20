@@ -6,6 +6,7 @@ export const getContacts = async (req, res, next) => {
     const { page = 1, perPage = 10, sortBy = 'name', sortOrder = 'asc', type, isFavourite } = req.query;
 
     const query = {};
+    
     if (type) {
       query.contactType = type;
     }
@@ -14,7 +15,7 @@ export const getContacts = async (req, res, next) => {
       query.isFavourite = isFavourite === 'true';  
     }
 
-    const totalItems = await contactsService.countContacts(query);
+    const totalItems = await contactsService.countContacts(query); 
     const totalPages = Math.ceil(totalItems / perPage);
 
     const contacts = await contactsService.getContacts(query, {
@@ -55,10 +56,6 @@ export const getContactById = async (req, res, next) => {
 };
 
 export const addContact = async (req, res, next) => {
-  if (!req.body.name || !req.body.phoneNumber) {
-    throw createError(400, 'Name and phone number are required.');
-  }
-
   try {
     const newContact = await contactsService.addContact(req.body);
     res.status(201).json({ status: 201, message: 'Successfully created a contact!', data: newContact });
