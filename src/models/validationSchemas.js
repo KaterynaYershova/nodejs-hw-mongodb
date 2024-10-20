@@ -12,7 +12,7 @@ export const contactSchema = Joi.object({
       .messages({
         'string.email': 'Будь ласка, введіть дійсну електронну адресу',
       }),
-    phone: Joi.string().min(3).max(20).required()
+      phoneNumber: Joi.string().min(3).max(20).required()
       .messages({
         'string.base': 'Телефон повинен бути рядком',
         'string.min': 'Телефон повинен містити мінімум 3 символи',
@@ -40,7 +40,7 @@ export const contactUpdateSchema = Joi.object({
       .messages({
         'string.email': 'Будь ласка, введіть дійсну електронну адресу',
       }),
-    phone: Joi.string().min(3).max(20)
+    phoneNumber: Joi.string().min(3).max(20)
       .messages({
         'string.base': 'Телефон повинен бути рядком',
         'string.min': 'Телефон повинен містити мінімум 3 символи',
