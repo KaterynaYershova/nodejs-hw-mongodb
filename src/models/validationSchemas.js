@@ -23,9 +23,9 @@ export const contactSchema = Joi.object({
       .messages({
         'boolean.base': 'Значення поля "обраний" повинно бути булевим',
       }),
-    contactType: Joi.string().valid('work', 'personal', 'other')
+    contactType: Joi.string().valid('work', 'home', 'personal', 'other')
       .messages({
-        'any.only': 'Тип контакту повинен бути одним із: work, personal, other',
+        'any.only': 'Тип контакту повинен бути одним із: work, home, personal, other',
       }),
 });
 
@@ -50,8 +50,8 @@ export const contactUpdateSchema = Joi.object({
       .messages({
         'boolean.base': 'Значення поля "обраний" повинно бути булевим',
       }),
-    contactType: Joi.string().valid('work', 'personal', 'other')
+    contactType: Joi.string().valid('work', 'home', 'personal', 'other')
       .messages({
-        'any.only': 'Тип контакту повинен бути одним із: work, personal, other',
+        'any.only': 'Тип контакту повинен бути одним із: work, home, personal, other',
       }),
 }).min(1); 
