@@ -14,12 +14,15 @@ export const authenticate = (req, res, next) => {
         return next(createError(401, 'Access token missing'));
     }
 
-    jwt.verify(token, JWT_SECRET, (err, user) => {
+    jwt.verify(token, JWT_SECRET, (err, decoded) => {
         if (err) {
-            return next(createError(401, 'Access token expired'));
+            const message = err.name === 'TokenExpiredError' 
+                ? 'Access token expired' 
+                : 'Invalid access token';
+            return next(createError(401, message));
         }
 
-        req.user = user;
+        req.user = { _id: decoded._id, email: decoded.email };
         next();
     });
 };

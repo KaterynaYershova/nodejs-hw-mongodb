@@ -49,7 +49,7 @@ export const login = async (req, res, next) => {
         const accessToken = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '15m' });
         const refreshToken = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '30d' });
 
-        await Session.findOneAndDelete({ userId: user._id }); 
+        await Session.findOneAndDelete({ userId: user._id });
         await Session.create({
             userId: user._id,
             accessToken,
@@ -84,8 +84,20 @@ export const refresh = async (req, res, next) => {
             throw createHttpError(401, 'Refresh token expired');
         }
 
-        const accessToken = jwt.sign({ userId: session.userId }, JWT_SECRET, { expiresIn: '15m' });
+        await Session.findByIdAndDelete(session._id);
 
+        const accessToken = jwt.sign({ userId: session.userId }, JWT_SECRET, { expiresIn: '15m' });
+        const newRefreshToken = jwt.sign({ userId: session.userId }, JWT_SECRET, { expiresIn: '30d' });
+
+        await Session.create({
+            userId: session.userId,
+            accessToken,
+            refreshToken: newRefreshToken,
+            accessTokenValidUntil: Date.now() + 15 * 60 * 1000,
+            refreshTokenValidUntil: Date.now() + 30 * 24 * 60 * 60 * 1000
+        });
+
+        res.cookie('refreshToken', newRefreshToken, { httpOnly: true });
         res.status(200).json({
             status: 'success',
             message: 'Successfully refreshed a session!',
@@ -99,10 +111,15 @@ export const refresh = async (req, res, next) => {
 };
 
 export const logout = async (req, res, next) => {
-    const { sessionId } = req.body;
+    const { refreshToken } = req.cookies;
 
     try {
-        await Session.findByIdAndDelete(sessionId); 
+        const session = await Session.findOneAndDelete({ refreshToken });
+        if (!session) {
+            throw createHttpError(404, 'Session not found');
+        }
+
+        res.clearCookie('refreshToken');
         res.status(204).send();
     } catch (error) {
         next(error);
