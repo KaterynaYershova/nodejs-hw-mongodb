@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const sessionSchema = new mongoose.Schema({
     userId: { 
@@ -26,4 +26,5 @@ const sessionSchema = new mongoose.Schema({
     timestamps: true  
 });
 
-module.exports = mongoose.model('Session', sessionSchema);
+const Session = mongoose.model('Session', sessionSchema);
+export default Session;
