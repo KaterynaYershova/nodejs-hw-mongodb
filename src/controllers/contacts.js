@@ -4,14 +4,14 @@ import createError from 'http-errors';
 export const getContacts = async (req, res, next) => {
   try {
     const { page = 1, perPage = 10, sortBy = 'name', sortOrder = 'asc', type, isFavourite } = req.query;
-    const query = { userId: req.user._id };  
+    const query = { userId: req.user._id }; 
 
     if (type) {
       query.contactType = type;
     }
 
     if (typeof isFavourite !== 'undefined') {
-      query.isFavourite = isFavourite === 'true';  
+      query.isFavourite = isFavourite === 'true';
     }
 
     const totalItems = await contactsService.countContacts(query); 
@@ -70,7 +70,7 @@ export const updateContact = async (req, res, next) => {
     if (!updatedContact) {
       throw createError(404, 'Contact not found');
     }
-    res.status(200).json({ status: 200, message: "Successfully updated a contact!", data: updatedContact });
+    res.status(200).json({ status: 200, message: 'Successfully updated a contact!', data: updatedContact });
   } catch (error) {
     next(error);
   }

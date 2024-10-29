@@ -5,6 +5,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret';
 
 export const authenticate = (req, res, next) => {
     const authHeader = req.headers.authorization;
+
     if (!authHeader) {
         return next(createError(401, 'Authorization header missing'));
     }
@@ -22,7 +23,7 @@ export const authenticate = (req, res, next) => {
             return next(createError(401, message));
         }
 
-        req.user = { _id: decoded._id, email: decoded.email };
+        req.user = { _id: decoded.userId };
         next();
     });
 };

@@ -24,7 +24,7 @@ export const register = async (req, res, next) => {
         });
 
         res.status(201).json({
-            status: 'success',
+            status: 201,
             message: 'Successfully registered a user!',
             data: {
                 id: user._id,
@@ -60,7 +60,7 @@ export const login = async (req, res, next) => {
 
         res.cookie('refreshToken', refreshToken, { httpOnly: true });
         res.status(200).json({
-            status: 'success',
+            status: 200,
             message: 'Successfully logged in a user!',
             data: {
                 accessToken
@@ -81,7 +81,7 @@ export const refresh = async (req, res, next) => {
 
         const session = await Session.findOne({ refreshToken });
         if (!session || session.refreshTokenValidUntil < Date.now()) {
-            throw createHttpError(401, 'Refresh token expired');
+            throw createHttpError(401, 'Invalid or expired refresh token');
         }
 
         await Session.findByIdAndDelete(session._id);
@@ -99,7 +99,7 @@ export const refresh = async (req, res, next) => {
 
         res.cookie('refreshToken', newRefreshToken, { httpOnly: true });
         res.status(200).json({
-            status: 'success',
+            status: 200,
             message: 'Successfully refreshed a session!',
             data: {
                 accessToken

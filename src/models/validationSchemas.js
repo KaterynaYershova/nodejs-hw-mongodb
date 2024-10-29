@@ -12,7 +12,7 @@ export const contactSchema = Joi.object({
       .messages({
         'string.email': 'Будь ласка, введіть дійсну електронну адресу',
       }),
-      phoneNumber: Joi.string().min(3).max(20).required()
+    phoneNumber: Joi.string().min(3).max(20).required()
       .messages({
         'string.base': 'Телефон повинен бути рядком',
         'string.min': 'Телефон повинен містити мінімум 3 символи',
@@ -54,4 +54,41 @@ export const contactUpdateSchema = Joi.object({
       .messages({
         'any.only': 'Тип контакту повинен бути одним із: work, home, personal, other',
       }),
-}).min(1); 
+}).min(1);
+
+export const registerSchema = Joi.object({
+    name: Joi.string().min(3).max(30).required()
+      .messages({
+        'string.base': 'Ім\'я повинно бути рядком',
+        'string.min': 'Ім\'я повинно містити мінімум 3 символи',
+        'string.max': 'Ім\'я повинно містити не більше 30 символів',
+        'any.required': 'Ім\'я є обов\'язковим полем',
+      }),
+    email: Joi.string().email().required()
+      .messages({
+        'string.email': 'Будь ласка, введіть дійсну електронну адресу',
+        'any.required': 'Email є обов\'язковим полем',
+      }),
+    password: Joi.string().min(6).max(30).required()
+      .messages({
+        'string.base': 'Пароль повинен бути рядком',
+        'string.min': 'Пароль повинен містити мінімум 6 символів',
+        'string.max': 'Пароль повинен містити не більше 30 символів',
+        'any.required': 'Пароль є обов\'язковим полем',
+      }),
+});
+
+export const loginSchema = Joi.object({
+    email: Joi.string().email().required()
+      .messages({
+        'string.email': 'Будь ласка, введіть дійсну електронну адресу',
+        'any.required': 'Email є обов\'язковим полем',
+      }),
+    password: Joi.string().min(6).max(30).required()
+      .messages({
+        'string.base': 'Пароль повинен бути рядком',
+        'string.min': 'Пароль повинен містити мінімум 6 символів',
+        'string.max': 'Пароль повинен містити не більше 30 символів',
+        'any.required': 'Пароль є обов\'язковим полем',
+      }),
+});
