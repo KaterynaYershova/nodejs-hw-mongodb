@@ -4,7 +4,8 @@ import User from '../models/user.js';
 import Session from '../models/session.js';
 import jwt from 'jsonwebtoken';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret';
+const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET || 'your_access_token_secret';
+const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET || 'your_refresh_token_secret';
 
 export const register = async (req, res, next) => {
     const { name, email, password } = req.body;
@@ -16,7 +17,6 @@ export const register = async (req, res, next) => {
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
-
         const user = await User.create({
             name,
             email,
@@ -46,8 +46,8 @@ export const login = async (req, res, next) => {
             throw createHttpError(401, 'Invalid email or password');
         }
 
-        const accessToken = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '15m' });
-        const refreshToken = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '30d' });
+        const accessToken = jwt.sign({ userId: user._id }, ACCESS_TOKEN_SECRET, { expiresIn: '15m' });
+        const refreshToken = jwt.sign({ userId: user._id }, REFRESH_TOKEN_SECRET, { expiresIn: '30d' });
 
         await Session.findOneAndDelete({ userId: user._id });
         await Session.create({
@@ -79,15 +79,17 @@ export const refresh = async (req, res, next) => {
             throw createHttpError(401, 'No refresh token provided');
         }
 
+        const decoded = jwt.verify(refreshToken, REFRESH_TOKEN_SECRET);
         const session = await Session.findOne({ refreshToken });
+        
         if (!session || session.refreshTokenValidUntil < Date.now()) {
             throw createHttpError(401, 'Invalid or expired refresh token');
         }
 
         await Session.findByIdAndDelete(session._id);
 
-        const accessToken = jwt.sign({ userId: session.userId }, JWT_SECRET, { expiresIn: '15m' });
-        const newRefreshToken = jwt.sign({ userId: session.userId }, JWT_SECRET, { expiresIn: '30d' });
+        const accessToken = jwt.sign({ userId: session.userId }, ACCESS_TOKEN_SECRET, { expiresIn: '15m' });
+        const newRefreshToken = jwt.sign({ userId: session.userId }, REFRESH_TOKEN_SECRET, { expiresIn: '30d' });
 
         await Session.create({
             userId: session.userId,

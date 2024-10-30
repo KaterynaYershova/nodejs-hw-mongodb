@@ -20,11 +20,17 @@ const sessionSchema = new mongoose.Schema({
     },
     refreshTokenValidUntil: { 
         type: Date, 
-        required: true 
+        required: true,
+        index: { expires: '0s' } 
     }
 }, {
     timestamps: true  
 });
+
+sessionSchema.statics.removeExpiredSessions = async function() {
+    const now = new Date();
+    await this.deleteMany({ refreshTokenValidUntil: { $lt: now } });
+};
 
 const Session = mongoose.model('Session', sessionSchema);
 export default Session;

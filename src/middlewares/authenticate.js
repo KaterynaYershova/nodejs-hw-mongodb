@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 import createError from 'http-errors';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret';
+const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET || 'your_access_token_secret';
 
 export const authenticate = (req, res, next) => {
     const authHeader = req.headers.authorization;
@@ -15,9 +15,9 @@ export const authenticate = (req, res, next) => {
         return next(createError(401, 'Access token missing'));
     }
 
-    jwt.verify(token, JWT_SECRET, (err, decoded) => {
+    jwt.verify(token, ACCESS_TOKEN_SECRET, (err, decoded) => {
         if (err) {
-            const message = err.name === 'TokenExpiredError' 
+            const message = err.name === 'TokenExpiredError'
                 ? 'Access token expired' 
                 : 'Invalid access token';
             return next(createError(401, message));
