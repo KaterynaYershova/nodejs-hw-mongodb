@@ -18,12 +18,13 @@ export const authenticate = (req, res, next) => {
     jwt.verify(token, ACCESS_TOKEN_SECRET, (err, decoded) => {
         if (err) {
             const message = err.name === 'TokenExpiredError'
-                ? 'Access token expired' 
+                ? 'Access token expired'
                 : 'Invalid access token';
             return next(createError(401, message));
         }
 
         req.user = { _id: decoded.userId };
+        
         next();
     });
 };

@@ -6,6 +6,8 @@ import jwt from 'jsonwebtoken';
 
 const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET || 'your_access_token_secret';
 const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET || 'your_refresh_token_secret';
+const ACCESS_TOKEN_EXPIRATION = '15m';
+const REFRESH_TOKEN_EXPIRATION = '30d';
 
 export const register = async (req, res, next) => {
     const { name, email, password } = req.body;
@@ -17,11 +19,7 @@ export const register = async (req, res, next) => {
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
-        const user = await User.create({
-            name,
-            email,
-            password: hashedPassword
-        });
+        const user = await User.create({ name, email, password: hashedPassword });
 
         res.status(201).json({
             status: 201,
@@ -46,8 +44,8 @@ export const login = async (req, res, next) => {
             throw createHttpError(401, 'Invalid email or password');
         }
 
-        const accessToken = jwt.sign({ userId: user._id }, ACCESS_TOKEN_SECRET, { expiresIn: '15m' });
-        const refreshToken = jwt.sign({ userId: user._id }, REFRESH_TOKEN_SECRET, { expiresIn: '30d' });
+        const accessToken = jwt.sign({ userId: user._id }, ACCESS_TOKEN_SECRET, { expiresIn: ACCESS_TOKEN_EXPIRATION });
+        const refreshToken = jwt.sign({ userId: user._id }, REFRESH_TOKEN_SECRET, { expiresIn: REFRESH_TOKEN_EXPIRATION });
 
         await Session.findOneAndDelete({ userId: user._id });
         await Session.create({
@@ -81,19 +79,19 @@ export const refresh = async (req, res, next) => {
 
         const decoded = jwt.verify(refreshToken, REFRESH_TOKEN_SECRET);
         const session = await Session.findOne({ refreshToken });
-        
+
         if (!session || session.refreshTokenValidUntil < Date.now()) {
             throw createHttpError(401, 'Invalid or expired refresh token');
         }
 
         await Session.findByIdAndDelete(session._id);
 
-        const accessToken = jwt.sign({ userId: session.userId }, ACCESS_TOKEN_SECRET, { expiresIn: '15m' });
-        const newRefreshToken = jwt.sign({ userId: session.userId }, REFRESH_TOKEN_SECRET, { expiresIn: '30d' });
+        const newAccessToken = jwt.sign({ userId: session.userId }, ACCESS_TOKEN_SECRET, { expiresIn: ACCESS_TOKEN_EXPIRATION });
+        const newRefreshToken = jwt.sign({ userId: session.userId }, REFRESH_TOKEN_SECRET, { expiresIn: REFRESH_TOKEN_EXPIRATION });
 
         await Session.create({
             userId: session.userId,
-            accessToken,
+            accessToken: newAccessToken,
             refreshToken: newRefreshToken,
             accessTokenValidUntil: Date.now() + 15 * 60 * 1000,
             refreshTokenValidUntil: Date.now() + 30 * 24 * 60 * 60 * 1000
@@ -104,7 +102,7 @@ export const refresh = async (req, res, next) => {
             status: 200,
             message: 'Successfully refreshed a session!',
             data: {
-                accessToken
+                accessToken: newAccessToken
             }
         });
     } catch (error) {

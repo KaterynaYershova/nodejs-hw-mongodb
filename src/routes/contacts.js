@@ -8,12 +8,16 @@ import { authenticate } from '../middlewares/authenticate.js';
 
 const router = express.Router();
 
-router.use(authenticate); 
+router.use(authenticate);
 
 router.get('/', ctrlWrapper(ctrl.getContacts));
+
 router.get('/:contactId', isValidId, ctrlWrapper(ctrl.getContactById));
-router.post('/', validateBody(contactSchema), ctrlWrapper(ctrl.addContact)); 
+
+router.post('/', validateBody(contactSchema), ctrlWrapper(ctrl.addContact));
+
 router.patch('/:contactId', isValidId, validateBody(contactUpdateSchema), ctrlWrapper(ctrl.updateContact));
+
 router.delete('/:contactId', isValidId, ctrlWrapper(ctrl.deleteContact));
 
 export default router;

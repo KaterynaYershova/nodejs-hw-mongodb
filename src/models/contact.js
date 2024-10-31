@@ -16,6 +16,6 @@ const contactSchema = new mongoose.Schema({
     ref: 'User', 
     required: true 
   }
-}, { versionKey: false });
+}, { versionKey: false, timestamps: true }); 
 
 export default mongoose.model('Contact', contactSchema);
