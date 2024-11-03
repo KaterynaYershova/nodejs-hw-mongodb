@@ -55,41 +55,46 @@ export const loginUser = async ({ email, password }) => {
     };
 };
 
-export const refreshSession = async (refreshToken) => {
-    let payload;
-    try {
-        payload = jwt.verify(refreshToken, REFRESH_TOKEN_SECRET);
-    } catch (error) {
-        throw createHttpError(401, 'Invalid or expired refresh token');
-    }
-
-    const session = await Session.findOne({ userId: payload.userId, refreshToken });
-    if (!session || new Date() > session.refreshTokenValidUntil) {
-        throw createHttpError(401, 'Session not found or refresh token expired');
-    }
-
-    await Session.deleteOne({ _id: session._id });
-
-    const newAccessToken = jwt.sign({ userId: payload.userId }, ACCESS_TOKEN_SECRET, { expiresIn: ACCESS_TOKEN_EXPIRES });
-    const newRefreshToken = jwt.sign({ userId: payload.userId }, REFRESH_TOKEN_SECRET, { expiresIn: REFRESH_TOKEN_EXPIRES });
-
-    await Session.create({
-        userId: payload.userId,
-        accessToken: newAccessToken,
-        refreshToken: newRefreshToken,
-        accessTokenValidUntil: new Date(Date.now() + 15 * 60 * 1000),
-        refreshTokenValidUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-    });
-
+const createSession = () => {
+    const accessToken = randomBytes(30).toString('base64');
+    const refreshToken = randomBytes(30).toString('base64');
+  
     return {
-        status: 'success',
-        message: 'Successfully refreshed a session!',
-        data: { accessToken: newAccessToken },
-        refreshToken: newRefreshToken,
+      accessToken,
+      refreshToken,
+      accessTokenValidUntil: new Date(Date.now() + FIFTEEN_MINUTES),
+      refreshTokenValidUntil: new Date(Date.now() + ONE_DAY),
     };
-};
+  };
+  
+  export const refreshUsersSession = async ({ sessionId, refreshToken }) => {
+    const session = await SessionsCollection.findOne({
+      _id: sessionId,
+      refreshToken,
+    });
+  
+    if (!session) {
+      throw createHttpError(401, 'Session not found');
+    }
+  
+    const isSessionTokenExpired =
+      new Date() > new Date(session.refreshTokenValidUntil);
+  
+    if (isSessionTokenExpired) {
+      throw createHttpError(401, 'Session token expired');
+    }
+    
+    const newSession = createSession();
+  
+    await SessionsCollection.deleteOne({ _id: sessionId, refreshToken });
+  
+    return await SessionsCollection.create({
+      userId: session.userId,
+      ...newSession,
+    });
+  };
 
 export const logoutUser = async (userId) => {
-    await Session.deleteMany({ userId });
+    await Session.deleteOne ({ userId });
     return { status: 'success', message: 'Successfully logged out' };
 };

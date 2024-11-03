@@ -10,7 +10,7 @@ const router = express.Router();
 
 router.use(authenticate);
 
-router.get('/', ctrlWrapper(ctrl.getContacts));
+router.get('/', ctrlWrapper(getContactsController));
 
 router.get('/:contactId', isValidId, ctrlWrapper(ctrl.getContactById));
 

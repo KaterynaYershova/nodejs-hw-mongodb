@@ -2,6 +2,7 @@ import bcrypt from 'bcrypt';
 import createHttpError from 'create-http-error';
 import User from '../models/user.js';
 import Session from '../models/session.js';
+import { logoutUser, refreshUsersSession } from '../services/auth.js';
 import jwt from 'jsonwebtoken';
 
 const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET || 'your_access_token_secret';
@@ -69,59 +70,41 @@ export const login = async (req, res, next) => {
     }
 };
 
-export const refresh = async (req, res, next) => {
-    const { refreshToken } = req.cookies;
+const setupSession = (res, session) => {
+    res.cookie('refreshToken', session.refreshToken, {
+      httpOnly: true,
+      expires: new Date(Date.now() + ONE_DAY),
+    });
+    res.cookie('sessionId', session._id, {
+      httpOnly: true,
+      expires: new Date(Date.now() + ONE_DAY),
+    });
+  };
+  
+  export const refreshUserSessionController = async (req, res) => {
+    const session = await refreshUsersSession({
+      sessionId: req.cookies.sessionId,
+      refreshToken: req.cookies.refreshToken,
+    });
+  
+    setupSession(res, session);
+  
+    res.json({
+      status: 200,
+      message: 'Successfully refreshed a session!',
+      data: {
+        accessToken: session.accessToken,
+      },
+    });
+  };
 
-    try {
-        if (!refreshToken) {
-            throw createHttpError(401, 'No refresh token provided');
-        }
-
-        const decoded = jwt.verify(refreshToken, REFRESH_TOKEN_SECRET);
-        const session = await Session.findOne({ refreshToken });
-
-        if (!session || session.refreshTokenValidUntil < Date.now()) {
-            throw createHttpError(401, 'Invalid or expired refresh token');
-        }
-
-        await Session.findByIdAndDelete(session._id);
-
-        const newAccessToken = jwt.sign({ userId: session.userId }, ACCESS_TOKEN_SECRET, { expiresIn: ACCESS_TOKEN_EXPIRATION });
-        const newRefreshToken = jwt.sign({ userId: session.userId }, REFRESH_TOKEN_SECRET, { expiresIn: REFRESH_TOKEN_EXPIRATION });
-
-        await Session.create({
-            userId: session.userId,
-            accessToken: newAccessToken,
-            refreshToken: newRefreshToken,
-            accessTokenValidUntil: Date.now() + 15 * 60 * 1000,
-            refreshTokenValidUntil: Date.now() + 30 * 24 * 60 * 60 * 1000
-        });
-
-        res.cookie('refreshToken', newRefreshToken, { httpOnly: true });
-        res.status(200).json({
-            status: 200,
-            message: 'Successfully refreshed a session!',
-            data: {
-                accessToken: newAccessToken
-            }
-        });
-    } catch (error) {
-        next(error);
+export const logoutUserController = async (req, res) => {
+    if (req.cookies.sessionId) {
+      await logoutUser(req.cookies.sessionId);
     }
-};
-
-export const logout = async (req, res, next) => {
-    const { refreshToken } = req.cookies;
-
-    try {
-        const session = await Session.findOneAndDelete({ refreshToken });
-        if (!session) {
-            throw createHttpError(404, 'Session not found');
-        }
-
-        res.clearCookie('refreshToken');
-        res.status(204).send();
-    } catch (error) {
-        next(error);
-    }
-};
+  
+    res.clearCookie('sessionId');
+    res.clearCookie('refreshToken');
+  
+    res.status(204).send();
+  };
