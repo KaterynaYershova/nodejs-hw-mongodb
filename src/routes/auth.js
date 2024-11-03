@@ -1,6 +1,5 @@
 import express from 'express';
-import { register, login, refresh, logoutUserController, refreshUserSessionController } from '../controllers/auth.js';
-import { authenticate } from '../middlewares/authenticate.js';
+import { register, login, logoutUserController, refreshUserSessionController } from '../controllers/auth.js';
 import { validateBody } from '../middlewares/validateBody.js';
 import { registerSchema, loginSchema } from '../models/validationSchemas.js';
 
