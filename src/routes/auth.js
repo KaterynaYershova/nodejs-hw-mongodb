@@ -2,6 +2,7 @@ import express from 'express';
 import { register, login, logoutUserController, refreshUserSessionController } from '../controllers/auth.js';
 import { validateBody } from '../middlewares/validateBody.js';
 import { registerSchema, loginSchema } from '../models/validationSchemas.js';
+import { ctrlWrapper } from '../utils/ctrlWrapper.js';
 
 const router = express.Router();
 
