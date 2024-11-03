@@ -37,7 +37,7 @@ export const loginUser = async ({ email, password }) => {
     const accessToken = randomBytes(30).toString('base64'); 
     const refreshToken = randomBytes(30).toString('base64'); 
 
-    await Session.create({
+    const newSession = await Session.create({
         userId: user._id,
         accessToken,
         refreshToken,
@@ -47,24 +47,15 @@ export const loginUser = async ({ email, password }) => {
 
     return {
         status: 'success',
-        message: 'Successfully logged in an user!',
-        data: { accessToken },
+        message: 'Successfully logged in a user!',
+        data: {
+            accessToken,
+            sessionId: newSession._id,
+        },
         refreshToken, 
     };
 };
 
-const createSession = () => {
-    const accessToken = randomBytes(30).toString('base64');
-    const refreshToken = randomBytes(30).toString('base64');
-  
-    return {
-      accessToken,
-      refreshToken,
-      accessTokenValidUntil: new Date(Date.now() + FIFTEEN_MINUTES),
-      refreshTokenValidUntil: new Date(Date.now() + ONE_DAY),
-    };
-};
-  
 export const refreshUsersSession = async ({ sessionId, refreshToken }) => {
     const session = await Session.findOne({
         _id: sessionId,
@@ -82,22 +73,26 @@ export const refreshUsersSession = async ({ sessionId, refreshToken }) => {
         throw createHttpError(401, 'Session token expired'); 
     }
     
-    const newSession = {
-        accessToken: randomBytes(30).toString('base64'),
-        refreshToken: randomBytes(30).toString('base64'),
-        accessTokenValidUntil: new Date(Date.now() + FIFTEEN_MINUTES),
-        refreshTokenValidUntil: new Date(Date.now() + ONE_DAY),
-    };
+    const newAccessToken = randomBytes(30).toString('base64');
+    const newRefreshToken = randomBytes(30).toString('base64');
   
-    await Session.deleteOne({ _id: sessionId, refreshToken });
+    await Session.deleteOne({ _id: sessionId });
   
     return await Session.create({
         userId: session.userId,
-        ...newSession,
+        accessToken: newAccessToken,
+        refreshToken: newRefreshToken,
+        accessTokenValidUntil: new Date(Date.now() + FIFTEEN_MINUTES),
+        refreshTokenValidUntil: new Date(Date.now() + ONE_DAY),
     });
 };
 
-export const logoutUser = async (userId) => {
-    await Session.deleteOne({ userId }); 
+export const logoutUser = async (sessionId) => {
+    const session = await Session.findById(sessionId);
+    if (!session) {
+        throw createHttpError(404, 'Session not found'); 
+    }
+    
+    await Session.deleteOne({ _id: sessionId }); 
     return { status: 'success', message: 'Successfully logged out' }; 
 };

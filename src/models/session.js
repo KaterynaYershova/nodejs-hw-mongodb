@@ -2,32 +2,32 @@ import mongoose from 'mongoose';
 
 const sessionSchema = new mongoose.Schema({
     userId: {
-        type: mongoose.Schema.Types.ObjectId,
+        type: mongoose.Schema.Types.ObjectId, 
         required: true,
-        ref: 'User'
+        ref: 'User' 
     },
     accessToken: {
         type: String,
-        required: true
+        required: true 
     },
     refreshToken: {
         type: String,
-        required: true
+        required: true 
     },
     accessTokenValidUntil: {
         type: Date,
-        required: true
+        required: true 
     },
     refreshTokenValidUntil: {
         type: Date,
-        required: true
+        required: true 
     }
-}, { timestamps: true });
+}, { timestamps: true }); 
 
 sessionSchema.statics.removeExpiredSessions = async function() {
-    const now = new Date();
-    await this.deleteMany({ refreshTokenValidUntil: { $lt: now } });
+    const now = new Date(); 
+    await this.deleteMany({ refreshTokenValidUntil: { $lt: now } }); 
 };
 
-const Session = mongoose.model('Session', sessionSchema);
-export default Session;
+const Session = mongoose.model('Session', sessionSchema); 
+export default Session; 
