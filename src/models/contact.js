@@ -15,7 +15,8 @@ const contactSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId, 
     ref: 'User', 
     required: true 
-  }
-}, { versionKey: false, timestamps: true }); 
+  },
+  photo: { type: String }, 
+}, { versionKey: false, timestamps: true });
 
 export default mongoose.model('Contact', contactSchema);

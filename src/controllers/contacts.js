@@ -1,10 +1,13 @@
 import * as contactsService from '../services/contacts.js';
 import createHttpError from 'http-errors';
+import { saveFileToCloudinary } from '../utils/saveFileToCloudinary.js';
+import { saveFileToUploadDir } from '../utils/saveFileToUploadDir.js';
+import { env } from '../utils/env.js';
 
 export const getContacts = async (req, res, next) => {
   try {
     const { page = 1, perPage = 10, sortBy = 'name', sortOrder = 'asc', type, isFavourite } = req.query;
-    const query = { userId: req.user._id }; 
+    const query = { userId: req.user._id };
 
     if (type) {
       query.contactType = type;
@@ -14,7 +17,7 @@ export const getContacts = async (req, res, next) => {
       query.isFavourite = isFavourite === 'true';
     }
 
-    const totalItems = await contactsService.countContacts(query); 
+    const totalItems = await contactsService.countContacts(query);
     const totalPages = Math.ceil(totalItems / perPage);
 
     const contacts = await contactsService.getContacts(query, {
@@ -66,7 +69,7 @@ export const addContact = async (req, res, next) => {
 
 export const updateContact = async (req, res, next) => {
   try {
-    const updatedContact = await contactsService.updateContact(req.params.contactId, req.user._id, req.body); 
+    const updatedContact = await contactsService.updateContact(req.params.contactId, req.user._id, req.body);
     if (!updatedContact) {
       throw createHttpError(404, 'Contact not found');
     }
@@ -83,6 +86,38 @@ export const deleteContact = async (req, res, next) => {
       throw createHttpError(404, 'Contact not found');
     }
     res.status(204).send();
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateContactPhoto = async (req, res, next) => {
+  const { contactId } = req.params;
+  const photo = req.file;
+
+  if (!photo) {
+    next(createHttpError(400, 'Photo is required.'));
+    return;
+  }
+
+  let photoUrl;
+  try {
+    if (env('ENABLE_CLOUDINARY') === 'true') {
+      photoUrl = await saveFileToCloudinary(photo);
+    } else {
+      photoUrl = await saveFileToUploadDir(photo);
+    }
+
+    const updatedContact = await contactsService.updateContact(contactId, req.user._id, { photo: photoUrl });
+    if (!updatedContact) {
+      throw createHttpError(404, 'Contact not found');
+    }
+
+    res.status(200).json({
+      status: 200,
+      message: 'Contact photo has been successfully updated.',
+      data: updatedContact,
+    });
   } catch (error) {
     next(error);
   }

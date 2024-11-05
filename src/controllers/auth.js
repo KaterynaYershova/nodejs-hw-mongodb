@@ -1,12 +1,12 @@
-import bcrypt from 'bcrypt'; 
-import createHttpError from 'create-http-error'; 
-import User from '../models/user.js'; 
-import Session from '../models/session.js'; 
-import { logoutUser, refreshUsersSession } from '../services/auth.js'; 
-import { randomBytes } from 'crypto'; 
+import bcrypt from 'bcrypt';
+import createHttpError from 'http-errors';
+import User from '../models/user.js';
+import Session from '../models/session.js';
+import { logoutUser, refreshUsersSession, requestResetToken, resetPassword } from '../services/auth.js';
+import { randomBytes } from 'crypto';
 
-const FIFTEEN_MINUTES = 15 * 60 * 1000; 
-const ONE_DAY = 30 * 24 * 60 * 60 * 1000; 
+const FIFTEEN_MINUTES = 15 * 60 * 1000;
+const ONE_DAY = 30 * 24 * 60 * 60 * 1000;
 
 export const register = async (req, res, next) => {
     const { name, email, password } = req.body;
@@ -69,43 +69,76 @@ export const login = async (req, res, next) => {
     }
 };
 
-export const refreshUserSessionController = async (req, res) => {
+export const refreshUserSessionController = async (req, res, next) => {
     if (!req.cookies.sessionId) {
         throw createHttpError(400, 'Session ID is missing');
     }
 
-    const session = await refreshUsersSession({
-        sessionId: req.cookies.sessionId,
-        refreshToken: req.cookies.refreshToken,
-    });
+    try {
+        const session = await refreshUsersSession({
+            sessionId: req.cookies.sessionId,
+            refreshToken: req.cookies.refreshToken,
+        });
 
-    res.cookie('refreshToken', session.refreshToken, {
-        httpOnly: true,
-        expires: new Date(Date.now() + ONE_DAY),
-    });
-    res.cookie('sessionId', session._id, { 
-        httpOnly: true,
-        expires: new Date(Date.now() + ONE_DAY),
-    });
+        res.cookie('refreshToken', session.refreshToken, {
+            httpOnly: true,
+            expires: new Date(Date.now() + ONE_DAY),
+        });
+        res.cookie('sessionId', session._id, { 
+            httpOnly: true,
+            expires: new Date(Date.now() + ONE_DAY),
+        });
 
-    res.json({
-        status: 200,
-        message: 'Successfully refreshed a session!',
-        data: {
-            accessToken: session.accessToken,
-        },
-    });
+        res.json({
+            status: 200,
+            message: 'Successfully refreshed a session!',
+            data: {
+                accessToken: session.accessToken,
+            },
+        });
+    } catch (error) {
+        next(error);
+    }
 };
 
-export const logoutUserController = async (req, res) => {
+export const logoutUserController = async (req, res, next) => {
     if (!req.cookies.sessionId) {
         throw createHttpError(400, 'Session ID is missing');
     }
 
-    await logoutUser(req.cookies.sessionId);
+    try {
+        await logoutUser(req.cookies.sessionId);
+        res.clearCookie('sessionId');
+        res.clearCookie('refreshToken');
+        res.status(204).send();
+    } catch (error) {
+        next(error);
+    }
+};
 
-    res.clearCookie('sessionId');
-    res.clearCookie('refreshToken');
 
-    res.status(204).send();
+export const requestResetEmailController = async (req, res, next) => {
+    try {
+        await requestResetToken(req.body.email);
+        res.json({
+            status: 200,
+            message: 'Reset password email has been successfully sent.',
+            data: {},
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const resetPasswordController = async (req, res, next) => {
+    try {
+        await resetPassword(req.body);
+        res.json({
+            status: 200,
+            message: 'Password has been successfully reset.',
+            data: {},
+        });
+    } catch (error) {
+        next(error);
+    }
 };
