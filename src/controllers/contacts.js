@@ -3,6 +3,7 @@ import createHttpError from 'http-errors';
 import { saveFileToCloudinary } from '../utils/saveFileToCloudinary.js';
 import { saveFileToUploadDir } from '../utils/saveFileToUploadDir.js';
 import { env } from '../utils/env.js';
+import { contactSchema } from '../models/validationSchemas.js'; 
 
 export const getContacts = async (req, res, next) => {
   try {
@@ -24,7 +25,7 @@ export const getContacts = async (req, res, next) => {
       sortBy,
       sortOrder,
       skip: (page - 1) * perPage,
-      limit: perPage
+      limit: perPage,
     });
 
     res.status(200).json({
@@ -38,7 +39,7 @@ export const getContacts = async (req, res, next) => {
         totalPages,
         hasPreviousPage: page > 1,
         hasNextPage: page < totalPages,
-      }
+      },
     });
   } catch (error) {
     next(error);
@@ -47,7 +48,7 @@ export const getContacts = async (req, res, next) => {
 
 export const getContactById = async (req, res, next) => {
   try {
-    const contact = await contactsService.getContactById(req.params.contactId, req.user._id);  
+    const contact = await contactsService.getContactById(req.params.contactId, req.user._id);
     if (!contact) {
       throw createHttpError(404, 'Contact not found');
     }
@@ -59,11 +60,24 @@ export const getContactById = async (req, res, next) => {
 
 export const addContact = async (req, res, next) => {
   try {
+    const { error } = contactSchema.validate(req.body);
+    if (error) {
+      throw createHttpError(400, `Validation error: ${error.details[0].message}`);
+    }
+
     const contactData = { ...req.body, userId: req.user._id };
     const newContact = await contactsService.addContact(contactData);
-    res.status(201).json({ status: 201, message: 'Successfully created a contact!', data: newContact });
+
+    res.status(201).json({
+      status: 201,
+      message: 'Successfully created a contact!',
+      data: newContact,
+    });
   } catch (error) {
-    next(error);
+    if (error.isJoi) {
+      return next(createHttpError(400, 'Invalid data'));
+    }
+    next(createHttpError(500, 'Failed to create contact. Please try again later.'));
   }
 };
 
@@ -73,7 +87,11 @@ export const updateContact = async (req, res, next) => {
     if (!updatedContact) {
       throw createHttpError(404, 'Contact not found');
     }
-    res.status(200).json({ status: 200, message: 'Successfully updated a contact!', data: updatedContact });
+    res.status(200).json({
+      status: 200,
+      message: 'Successfully updated a contact!',
+      data: updatedContact,
+    });
   } catch (error) {
     next(error);
   }
@@ -81,7 +99,7 @@ export const updateContact = async (req, res, next) => {
 
 export const deleteContact = async (req, res, next) => {
   try {
-    const deleted = await contactsService.deleteContact(req.params.contactId, req.user._id); 
+    const deleted = await contactsService.deleteContact(req.params.contactId, req.user._id);
     if (!deleted) {
       throw createHttpError(404, 'Contact not found');
     }
@@ -96,8 +114,7 @@ export const updateContactPhoto = async (req, res, next) => {
   const photo = req.file;
 
   if (!photo) {
-    next(createHttpError(400, 'Photo is required.'));
-    return;
+    return next(createHttpError(400, 'Photo is required.'));
   }
 
   let photoUrl;
