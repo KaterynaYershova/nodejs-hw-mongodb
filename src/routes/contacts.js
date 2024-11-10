@@ -22,7 +22,7 @@ router.patch('/:contactId', isValidId, validateBody(contactUpdateSchema), ctrlWr
 router.delete('/:contactId', isValidId, ctrlWrapper(ctrl.deleteContact));
 
 router.patch(
-  '/:contactId/photo',
+  '/:contactId',
   isValidId,
   upload.single('photo'), 
   ctrlWrapper(ctrl.updateContactPhoto) 
