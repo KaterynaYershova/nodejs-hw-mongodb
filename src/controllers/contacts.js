@@ -3,7 +3,7 @@ import createHttpError from 'http-errors';
 import { saveFileToCloudinary } from '../utils/saveFileToCloudinary.js';
 import { saveFileToUploadDir } from '../utils/saveFileToUploadDir.js';
 import { env } from '../utils/env.js';
-import { contactSchema, updateContactSchema } from '../models/validationSchemas.js'; 
+import { contactSchema, contactUpdateSchema } from '../models/validationSchemas.js'; 
 import { validateBody } from '../middlewares/validateBody.js'; 
 
 export const getContacts = async (req, res, next) => {
@@ -83,7 +83,7 @@ export const addContact = async (req, res, next) => {
 };
 
 export const updateContact = [
-  validateBody(updateContactSchema), 
+  validateBody(contactUpdateSchema), 
   async (req, res, next) => {
     try {
       const updatedContact = await contactsService.updateContact(req.params.contactId, req.user._id, req.body);
