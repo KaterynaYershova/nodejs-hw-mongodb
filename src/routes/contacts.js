@@ -17,15 +17,14 @@ router.get('/:contactId', isValidId, ctrlWrapper(ctrl.getContactById));
 
 router.post('/', upload.single('photo'), validateBody(contactSchema), ctrlWrapper(ctrl.addContact));
 
-router.patch('/:contactId', isValidId, validateBody(contactUpdateSchema), ctrlWrapper(ctrl.updateContact));
-
-router.delete('/:contactId', isValidId, ctrlWrapper(ctrl.deleteContact));
-
 router.patch(
   '/:contactId',
   isValidId,
   upload.single('photo'), 
-  ctrlWrapper(ctrl.updateContactPhoto) 
+  validateBody(contactUpdateSchema), 
+  ctrlWrapper(ctrl.updateContact)
 );
+
+router.delete('/:contactId', isValidId, ctrlWrapper(ctrl.deleteContact));
 
 export default router;
