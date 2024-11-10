@@ -3,7 +3,8 @@ import createHttpError from 'http-errors';
 import { saveFileToCloudinary } from '../utils/saveFileToCloudinary.js';
 import { saveFileToUploadDir } from '../utils/saveFileToUploadDir.js';
 import { env } from '../utils/env.js';
-import { contactSchema } from '../models/validationSchemas.js'; 
+import { contactSchema, updateContactSchema } from '../models/validationSchemas.js'; 
+import { validateBody } from '../middlewares/validateBody.js'; 
 
 export const getContacts = async (req, res, next) => {
   try {
@@ -81,21 +82,24 @@ export const addContact = async (req, res, next) => {
   }
 };
 
-export const updateContact = async (req, res, next) => {
-  try {
-    const updatedContact = await contactsService.updateContact(req.params.contactId, req.user._id, req.body);
-    if (!updatedContact) {
-      throw createHttpError(404, 'Contact not found');
+export const updateContact = [
+  validateBody(updateContactSchema), 
+  async (req, res, next) => {
+    try {
+      const updatedContact = await contactsService.updateContact(req.params.contactId, req.user._id, req.body);
+      if (!updatedContact) {
+        throw createHttpError(404, 'Contact not found');
+      }
+      res.status(200).json({
+        status: 200,
+        message: 'Successfully updated a contact!',
+        data: updatedContact,
+      });
+    } catch (error) {
+      next(error);
     }
-    res.status(200).json({
-      status: 200,
-      message: 'Successfully updated a contact!',
-      data: updatedContact,
-    });
-  } catch (error) {
-    next(error);
-  }
-};
+  },
+];
 
 export const deleteContact = async (req, res, next) => {
   try {
