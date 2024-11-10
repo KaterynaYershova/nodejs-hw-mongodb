@@ -15,7 +15,7 @@ router.get('/', ctrlWrapper(ctrl.getContacts));
 
 router.get('/:contactId', isValidId, ctrlWrapper(ctrl.getContactById));
 
-router.post('/', validateBody(contactSchema), upload.single('photo'), ctrlWrapper(ctrl.addContact));
+router.post('/', upload.single('photo'), validateBody(contactSchema), ctrlWrapper(ctrl.addContact));
 
 router.patch('/:contactId', isValidId, validateBody(contactUpdateSchema), ctrlWrapper(ctrl.updateContact));
 
