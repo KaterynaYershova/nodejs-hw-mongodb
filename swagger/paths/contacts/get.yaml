@@ -1,0 +1,38 @@
+tags:
+  - Contacts
+summary: Get list of contacts
+operationId: getContacts
+description: Retrieve a list of contacts with optional query parameters for filtering.
+security:
+  - bearerAuth: []
+parameters:
+  - in: query
+    name: page
+    schema:
+      type: integer
+    example: 1
+  - in: query
+    name: perPage
+    schema:
+      type: integer
+    example: 10
+responses:
+  '200':
+    description: Successfully retrieved list of contacts
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            status:
+              type: integer
+              example: 200
+            message:
+              type: string
+              example: "Successfully retrieved contacts"
+            data:
+              type: array
+              items:
+                $ref: '../../components/schemas/contact.yaml'
+  '404':
+    description: No contacts found

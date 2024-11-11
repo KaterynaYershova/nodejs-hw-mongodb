@@ -1,0 +1,15 @@
+apis:
+  sample@v1:
+    root: docs/openapi.yaml
+extends:
+  - recommended
+theme:
+  htmlTemplate: ./docs/index.html
+  colors:
+    primary:
+      main: '#32329f'
+  generateCodeSamples:
+    languages:
+      - lang: curl
+      - lang: Node.js
+      - lang: JavaScript

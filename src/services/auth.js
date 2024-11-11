@@ -10,6 +10,7 @@ import fs from 'node:fs/promises';
 import handlebars from 'handlebars';
 import { SMTP, TEMPLATES_DIR } from '../constants/index.js';
 import { env } from '../utils/env.js';
+import { validateCode, getFullNameFromGoogleTokenPayload } from '../utils/googleOAuth2.js';
 
 const FIFTEEN_MINUTES = 15 * 60 * 1000;
 const ONE_DAY = 30 * 24 * 60 * 60 * 1000;
@@ -148,4 +149,41 @@ export const resetPassword = async (payload) => {
 
     const hashedPassword = await bcrypt.hash(payload.password, 10);
     await User.updateOne({ _id: user._id }, { password: hashedPassword });
+};
+
+export const loginOrSignupWithGoogle = async (code) => {
+    const loginTicket = await validateCode(code);
+    const payload = loginTicket.getPayload();
+    if (!payload) throw createHttpError(401);
+
+    let user = await User.findOne({ email: payload.email });
+    if (!user) {
+        const password = await bcrypt.hash(randomBytes(10).toString('hex'), 10);
+        user = await User.create({
+            email: payload.email,
+            name: getFullNameFromGoogleTokenPayload(payload),
+            password,
+            role: 'parent',
+        });
+    }
+
+    const accessToken = randomBytes(30).toString('base64');
+    const refreshToken = randomBytes(30).toString('base64');
+
+    const newSession = await Session.create({
+        userId: user._id,
+        accessToken,
+        refreshToken,
+        accessTokenValidUntil: new Date(Date.now() + FIFTEEN_MINUTES),
+        refreshTokenValidUntil: new Date(Date.now() + ONE_DAY),
+    });
+
+    return {
+        status: 'success',
+        message: 'Successfully logged in via Google OAuth!',
+        data: {
+            accessToken: newSession.accessToken,
+            refreshToken: newSession.refreshToken,
+        },
+    };
 };

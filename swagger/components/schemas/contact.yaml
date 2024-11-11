@@ -1,0 +1,15 @@
+type: object
+required:
+  - id
+  - name
+  - email
+properties:
+  id:
+    type: string
+    description: Contact ID
+  name:
+    type: string
+    description: Contact name
+  email:
+    type: string
+    description: Contact email address

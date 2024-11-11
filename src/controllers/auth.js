@@ -2,7 +2,8 @@ import bcrypt from 'bcrypt';
 import createHttpError from 'http-errors';
 import User from '../models/user.js';
 import Session from '../models/session.js';
-import { logoutUser, refreshUsersSession, requestResetToken, resetPassword } from '../services/auth.js';
+import { logoutUser, refreshUsersSession, requestResetToken, resetPassword, loginOrSignupWithGoogle } from '../services/auth.js';
+import { generateAuthUrl } from '../utils/googleOAuth2.js'; 
 import { randomBytes } from 'crypto';
 
 const FIFTEEN_MINUTES = 15 * 60 * 1000;
@@ -69,6 +70,35 @@ export const login = async (req, res, next) => {
     }
 };
 
+export const getGoogleOAuthUrlController = async (req, res) => {
+    const url = generateAuthUrl();
+    res.json({
+        status: 200,
+        message: 'Successfully generated Google OAuth URL!',
+        data: {
+            url,
+        },
+    });
+};
+
+export const loginWithGoogleController = async (req, res, next) => {
+    try {
+        const session = await loginOrSignupWithGoogle(req.body.code); 
+        res.cookie('refreshToken', session.refreshToken, { httpOnly: true, expires: new Date(Date.now() + ONE_DAY) });
+        res.cookie('sessionId', session._id, { httpOnly: true, expires: new Date(Date.now() + ONE_DAY) });
+        
+        res.json({
+            status: 200,
+            message: 'Successfully logged in via Google OAuth!',
+            data: {
+                accessToken: session.accessToken,
+            },
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
 export const refreshUserSessionController = async (req, res, next) => {
     if (!req.cookies.sessionId) {
         throw createHttpError(400, 'Session ID is missing');
@@ -115,7 +145,6 @@ export const logoutUserController = async (req, res, next) => {
         next(error);
     }
 };
-
 
 export const requestResetEmailController = async (req, res, next) => {
     try {
