@@ -12,6 +12,7 @@ tags:
     description: Operations related to contacts
 servers:
   - url: http://localhost:3000
+  - url: https://nodejs-hw-mongodb-yznf.onrender.com
 paths:
   /contacts/{contactId}:
     get:
