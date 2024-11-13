@@ -13,10 +13,16 @@ tags:
 servers:
   - url: http://localhost:3000
   - url: https://nodejs-hw-mongodb-yznf.onrender.com
-paths:
-  /contacts/{contactId}:
-    get:
-      $ref: ../swagger/paths/contacts/{id}/get.yaml
+  paths:
+    /contacts:
+      $ref: '../swagger/paths/contacts/get.yaml'
+    /contacts/{contactId}:
+      get:
+        $ref: '../swagger/paths/contacts/{id}/get.yaml'
+      patch:
+        $ref: '../swagger/paths/contacts/{id}/patch.yaml'
+      delete:
+        $ref: '../swagger/paths/contacts/{id}/delete.yaml'
 components:
   securitySchemes:
     bearerAuth:

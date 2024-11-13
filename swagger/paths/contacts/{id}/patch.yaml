@@ -33,9 +33,9 @@ requestBody:
             type: string
             description: Contact's updated phone number
             example: '+123456789'
-      required:
-        - name
-        - email
+        required:
+          - name
+          - email
 responses:
   '200':
     description: Contact updated successfully
@@ -54,6 +54,17 @@ responses:
               $ref: '../../components/schemas/contact.yaml'
   '400':
     description: Invalid request body
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            status:
+              type: integer
+              example: 400
+            message:
+              type: string
+              example: "Invalid request body. Please check the data format."
   '404':
     description: Contact not found
     content:

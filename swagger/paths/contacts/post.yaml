@@ -60,5 +60,6 @@ responses:
             message:
               type: string
               example: "Invalid input data"
+
   '401':
     $ref: '../../components/responses/401.yaml'

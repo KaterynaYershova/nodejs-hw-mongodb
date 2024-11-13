@@ -1,15 +1,18 @@
 type: object
-required:
-  - id
-  - name
-  - email
 properties:
   id:
     type: string
-    description: Contact ID
+    example: "5f8f8c44b54764421b7156c9"
   name:
     type: string
-    description: Contact name
+    example: "John Doe"
   email:
     type: string
-    description: Contact email address
+    example: "johndoe@example.com"
+  phone:
+    type: string
+    example: "+1234567890"
+required:
+  - name
+  - email
+  - phone

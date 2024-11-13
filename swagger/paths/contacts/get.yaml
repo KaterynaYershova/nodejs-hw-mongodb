@@ -33,6 +33,9 @@ responses:
             data:
               type: array
               items:
-                $ref: '../../components/schemas/contact.yaml'
-  '404':
-    description: No contacts found
+                items:
+                  $ref: '../../components/schemas/contact.yaml'
+'401':
+  $ref: '../../components/responses/401.yaml'
+'404':
+  $ref: '../../components/responses/404.yaml'
