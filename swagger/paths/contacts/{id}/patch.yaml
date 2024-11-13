@@ -51,7 +51,7 @@ responses:
               type: string
               example: "Contact updated successfully"
             data:
-              $ref: '../../components/schemas/contact.yaml'
+              $ref: ../../../components/schemas/contact.yaml
   '400':
     description: Invalid request body
     content:
