@@ -2,13 +2,13 @@ tags:
   - Contacts
 summary: Create a new contact
 operationId: createContact
-description: Endpoint for creating a new contact.
+description: Endpoint for creating a new contact with an optional photo.
 security:
   - bearerAuth: []
 requestBody:
   required: true
   content:
-    application/json:
+    multipart/form-data:
       schema:
         type: object
         required:
@@ -31,6 +31,10 @@ requestBody:
             type: string
             description: "Contact's address"
             example: "123 Main St, Springfield"
+          photo:
+            type: string
+            format: binary
+            description: "Photo of the contact"
 responses:
   '201':
     description: Contact created successfully
@@ -60,6 +64,5 @@ responses:
             message:
               type: string
               example: "Invalid input data"
-
   '401':
     $ref: '../../components/responses/401.yaml'

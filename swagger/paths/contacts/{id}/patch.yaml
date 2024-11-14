@@ -17,7 +17,7 @@ requestBody:
   description: Fields to update for the contact
   required: true
   content:
-    application/json:
+    multipart/form-data:
       schema:
         type: object
         properties:
@@ -33,6 +33,10 @@ requestBody:
             type: string
             description: Contact's updated phone number
             example: '+123456789'
+          photo:
+            type: string
+            format: binary
+            description: Contact's updated photo
         required:
           - name
           - email

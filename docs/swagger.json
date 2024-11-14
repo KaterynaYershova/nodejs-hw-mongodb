@@ -98,7 +98,7 @@
         ],
         "summary": "Create a new contact",
         "operationId": "createContact",
-        "description": "Endpoint for creating a new contact.",
+        "description": "Endpoint for creating a new contact with an optional photo.",
         "security": [
           {
             "bearerAuth": []
@@ -107,7 +107,7 @@
         "requestBody": {
           "required": true,
           "content": {
-            "application/json": {
+            "multipart/form-data": {
               "schema": {
                 "type": "object",
                 "required": [
@@ -134,6 +134,11 @@
                     "type": "string",
                     "description": "Contact's address",
                     "example": "123 Main St, Springfield"
+                  },
+                  "photo": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "Photo of the contact"
                   }
                 }
               }
@@ -274,7 +279,7 @@
           "description": "Fields to update for the contact",
           "required": true,
           "content": {
-            "application/json": {
+            "multipart/form-data": {
               "schema": {
                 "type": "object",
                 "properties": {
@@ -292,6 +297,11 @@
                     "type": "string",
                     "description": "Contact's updated phone number",
                     "example": "+123456789"
+                  },
+                  "photo": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "Contact's updated photo"
                   }
                 },
                 "required": [
