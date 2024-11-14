@@ -493,6 +493,11 @@
           "phone": {
             "type": "string",
             "example": "+1234567890"
+          },
+          "photo": {
+            "type": "string",
+            "format": "binary",
+            "description": "Photo of the contact"
           }
         },
         "required": [
