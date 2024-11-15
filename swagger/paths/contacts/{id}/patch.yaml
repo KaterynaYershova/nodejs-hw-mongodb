@@ -25,21 +25,27 @@ requestBody:
             type: string
             description: Contact's updated name
             example: 'Jane Doe'
+          phoneNumber:
+            type: string
+            description: Contact's updated phone number
+            example: '+123456789'
           email:
             type: string
             description: Contact's updated email
             example: 'jane.doe@example.com'
-          phone:
+          isFavourite:
+            type: boolean
+            description: Mark contact as favourite
+            example: true
+          contactType:
             type: string
-            description: Contact's updated phone number
-            example: '+123456789'
+            enum: ['work', 'home', 'personal', 'other']
+            description: Updated type of contact
+            example: 'personal'
           photo:
             type: string
             format: binary
             description: Contact's updated photo
-        required:
-          - name
-          - email
 responses:
   '200':
     description: Contact updated successfully

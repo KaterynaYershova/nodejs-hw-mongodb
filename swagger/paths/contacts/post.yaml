@@ -13,24 +13,30 @@ requestBody:
         type: object
         required:
           - name
-          - email
+          - phoneNumber
+          - contactType
         properties:
           name:
             type: string
             description: "Name of the contact"
             example: "John Doe"
+          phoneNumber:
+            type: string
+            description: "Phone number of the contact"
+            example: "+1234567890"
           email:
             type: string
             description: "Email address of the contact"
             example: "john.doe@example.com"
-          phone:
+          isFavourite:
+            type: boolean
+            description: "Mark contact as favorite"
+            example: false
+          contactType:
             type: string
-            description: "Phone number of the contact"
-            example: "+1234567890"
-          address:
-            type: string
-            description: "Contact's address"
-            example: "123 Main St, Springfield"
+            enum: ['work', 'home', 'personal', 'other']
+            description: "Type of contact"
+            example: 'personal'
           photo:
             type: string
             format: binary
