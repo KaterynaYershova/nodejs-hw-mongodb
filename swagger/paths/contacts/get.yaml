@@ -2,7 +2,7 @@ tags:
   - Contacts
 summary: Get list of contacts
 operationId: getContacts
-description: Retrieve a list of contacts with optional query parameters for filtering.
+description: Retrieve a list of contacts with optional query parameters for filtering and sorting.
 security:
   - bearerAuth: []
 parameters:
@@ -11,11 +11,28 @@ parameters:
     schema:
       type: integer
     example: 1
+    description: The page number to retrieve.
   - in: query
     name: perPage
     schema:
       type: integer
     example: 10
+    description: Number of contacts per page.
+  - in: query
+    name: sortBy
+    schema:
+      type: string
+    example: "name"
+    description: Field to sort by (e.g., name, email).
+  - in: query
+    name: sortOrder
+    schema:
+      type: string
+      enum:
+        - asc
+        - desc
+    example: "asc"
+    description: Sort order (ascending or descending).
 responses:
   '200':
     description: Successfully retrieved list of contacts
@@ -33,9 +50,8 @@ responses:
             data:
               type: array
               items:
-                items:
-                  $ref: ../../components/schemas/contact.yaml
+                $ref: ../../components/schemas/contact.yaml
   '401':
-   $ref: '../../components/responses/401.yaml'
+    $ref: '../../components/responses/401.yaml'
   '404':
-   $ref: '../../components/responses/404.yaml'
+    $ref: '../../components/responses/404.yaml'

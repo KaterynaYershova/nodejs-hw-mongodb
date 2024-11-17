@@ -31,7 +31,7 @@
         ],
         "summary": "Get list of contacts",
         "operationId": "getContacts",
-        "description": "Retrieve a list of contacts with optional query parameters for filtering.",
+        "description": "Retrieve a list of contacts with optional query parameters for filtering and sorting.",
         "security": [
           {
             "bearerAuth": []
@@ -44,7 +44,8 @@
             "schema": {
               "type": "integer"
             },
-            "example": 1
+            "example": 1,
+            "description": "The page number to retrieve."
           },
           {
             "in": "query",
@@ -52,7 +53,30 @@
             "schema": {
               "type": "integer"
             },
-            "example": 10
+            "example": 10,
+            "description": "Number of contacts per page."
+          },
+          {
+            "in": "query",
+            "name": "sortBy",
+            "schema": {
+              "type": "string"
+            },
+            "example": "name",
+            "description": "Field to sort by (e.g., name, email)."
+          },
+          {
+            "in": "query",
+            "name": "sortOrder",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            },
+            "example": "asc",
+            "description": "Sort order (ascending or descending)."
           }
         ],
         "responses": {
@@ -74,9 +98,7 @@
                     "data": {
                       "type": "array",
                       "items": {
-                        "items": {
-                          "$ref": "#/components/schemas/contact"
-                        }
+                        "$ref": "#/components/schemas/contact"
                       }
                     }
                   }
